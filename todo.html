@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My To Do</title>
+    <link rel="stylesheet" href="todo.css">
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+</head>
+<body>
+    <div id="react-container"></div>
+    
+
+
+
+    <script type="text/babel">
+
+        class TaskPanel extends React.Component {
+            render() {
+                return(
+                    <div className="taskPanel">
+                        <p></p>
+                    </div>
+                );
+            }
+        }
+
+        const EditBoard = function(props) {
+
+            return(
+                <div className="clipBoard">
+                    <h3 className="clipTitle">Create Task <span className="todoAdd" onClick={props.onClick}>&times;</span></h3>
+                    <div className="taskInput">
+                        <input type="text" placeholder="Task description" ref={props.refs} />
+                    </div>
+                    <p className="taskSave" onClick={props.onDone}>Done</p>
+                    
+                </div>
+            );
+        }
+
+        const ClipBoard = function(props) {
+
+            return (
+                <div className="clipBoard">
+                    <h3 className="clipTitle">TODO <span className="todoAdd" onClick={props.onClick}>+</span></h3>
+                    <ul>
+                        {props.tasks.map((task, i) => 
+                            <li key={task.id}>
+                                <div className="taskPanel">
+                                    {task.task} <span className="taskEdit" 
+                                    onClick={() => props.onRemove(i)}>&minus;</span>
+                                </div>
+                            </li>
+                        )}
+                    </ul>
+                </div>
+            );
+
+        }
+
+        class TodoList extends React.Component {
+            constructor(props) {
+                super(props);
+                this.task = React.createRef();
+                this.state = {
+                    creating: false,
+                    todoTasks: [],
+                    prevLength: 0
+                }
+            }
+
+            ccTask() {
+                this.setState({creating: !this.state.creating});
+            }
+
+            saveTask() {
+                if (this.task.current.value.trim() != "") {
+                    let taskVal = this.state.todoTasks;
+                    this.setState({prevLength: this.state.prevLength+1});
+                    let id = this.state.prevLength;
+                    let taskObj = {id: id, task: this.task.current.value}
+                    taskVal.unshift(taskObj);
+                    this.setState({todoTasks: taskVal});
+                }
+                this.ccTask();
+            }
+
+            deleteTask(i) {
+                let taskDel = this.state.todoTasks;
+                taskDel.splice(i, 1);
+                this.setState({todoTasks: taskDel});
+            }
+
+            renderClipBoard() {
+                return(<ClipBoard  onClick={() => this.ccTask()} 
+                tasks={this.state.todoTasks} onRemove={(i) => this.deleteTask(i)}/>);
+            }
+
+            renderEditBoard() {
+                return(<EditBoard onClick={() => this.ccTask()} onDone={() => this.saveTask()} refs={this.task} />);
+            }
+
+            render() {
+                return this.state.creating === false? 
+                this.renderClipBoard(): this.renderEditBoard();
+            }
+        }
+
+        ReactDOM.render(<TodoList />, document.getElementById("react-container"));
+
+    </script>
+</body>
+</html>
